@@ -68,7 +68,8 @@ void VideoSync::connectWidgets()
 {
     connect(m_button1, &QPushButton::clicked, this, &VideoSync::onOpenMpvClick);
     connect(m_button2, &QPushButton::clicked, this, [this] {
-        sendMpvCommand({"get_property", "volume"});
+        sendMpvCommand({"seek", 60.0, "absolute", "exact"});
+        sendMpvCommand({"set_property", "pause", false});
     });
 
     connect(m_mpvProcess, &QProcess::stateChanged, m_button1, [this] {
@@ -96,7 +97,7 @@ void VideoSync::connectWidgets()
                 if (state == QLocalSocket::LocalSocketState::ConnectedState) {
                     qDebug() << "MPV socket connected";
                     QTimer::singleShot(100, m_mpvSocket, [this] { // WHY IS THIS NECESSARY
-                        sendMpvCommand({"observe_property", 1, "time-pos"});
+                        sendMpvCommand({"observe_property", 1, "playback-time"});
                     });
                 } else {
                     qDebug() << "MPV socket no connection";
