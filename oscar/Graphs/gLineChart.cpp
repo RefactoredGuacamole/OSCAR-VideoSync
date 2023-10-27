@@ -15,6 +15,7 @@
 
 #include <QString>
 #include <QDebug>
+#include <QPainterPath>
 
 #include <math.h>
 
@@ -519,8 +520,22 @@ void gLineChart::paint(QPainter &painter, gGraph &w, const QRegion &region)
     w.getPlayhead(playheadVisible, playheadTime);
     if (playheadVisible && (playheadTime > minx) && (playheadTime < maxx)) {
         double xpos = (playheadTime - double(minx)) * xmult;
-        painter.setPen(QPen(QBrush(QColor(255,100,100,255)),1));
+        painter.setPen(QPen(QBrush(QColor(248, 92, 110)), 3));
         painter.drawLine(left+xpos, top-w.marginTop()-3, left+xpos, top+height+w.bottom-1);
+
+        // Draw triangle
+        constexpr float WIDTH = 13;
+        constexpr float HEIGHT = 10;
+        const QPointF OFFSET(-1, -5);
+        const QPointF pt1(left + xpos - WIDTH / 2 + OFFSET.x(), top - w.marginTop() + OFFSET.y());
+        const QPointF pt2(left + xpos + OFFSET.x(), top - w.marginTop() + OFFSET.y() + HEIGHT);
+        const QPointF pt3(left + xpos + WIDTH / 2 + OFFSET.x(), top - w.marginTop() + OFFSET.y());
+        QPainterPath tri;
+        tri.moveTo(pt1);
+        tri.lineTo(pt2);
+        tri.lineTo(pt3);
+        tri.lineTo(pt1);
+        painter.fillPath(tri, QBrush(QColor(248, 92, 110)));
     }
 
     double lastpx, lastpy;
