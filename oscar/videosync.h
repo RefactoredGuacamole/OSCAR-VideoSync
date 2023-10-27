@@ -15,14 +15,17 @@ public:
 signals:
 
 private:
-    void createWidgets();
-    void connectWidgets();
-
-    QPushButton *m_button1;
-    QProcess* m_mpvProcess;
     QString m_mpvPath;
+    QString m_mpvSocketName;
+
+    QProcess *m_mpvProcess;
     QLocalSocket *m_mpvSocket;
 
+    QPushButton *m_button1;
+
+    void initMpvPaths();
+    void createWidgets();
+    void connectWidgets();
     void onOpenMpvClick();
 };
 
