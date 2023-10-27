@@ -283,6 +283,15 @@ void VideoSync::update() {
 void VideoSync::loadDate(QDate date) {
     m_date = date;
 
+    loadSettings();
+    update();
+    // Idk best way to handle this - can't call in update() because could mess with editing
+    m_syncSkewEdit->setText(QString::asprintf("%.10f", m_syncSkew));
+
+    // TODO refresh mpv
+}
+
+void VideoSync::loadSettings() {
     // Clear all settings
     m_videoPath = "";
     m_synced = false;
@@ -313,10 +322,6 @@ void VideoSync::loadDate(QDate date) {
         m_syncSkew = videoObj["syncSkew"].toDouble();
         break; // Assume only one video for now
     }
-
-    update();
-
-    // TODO refresh mpv
 }
 
 void VideoSync::saveSettings() {

@@ -63,6 +63,7 @@ private:
     void onMpvSocketReadyRead();
     void sendMpvCommand(const QJsonArray &cmd);
     void update();
+    void loadSettings();
     void saveSettings();
     QString buildSettingsFilePath();
     void updateMpv();
