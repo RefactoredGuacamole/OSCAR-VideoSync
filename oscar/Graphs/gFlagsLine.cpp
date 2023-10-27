@@ -189,6 +189,46 @@ void gFlagsGroup::paint(QPainter &painter, gGraph &g, const QRegion &region)
     g.graphView()->GetXBounds(minx,maxx);
     dur = maxx - minx;
 
+    #if BAR_TITLE_BAR_DEBUG
+    // debug for minimum size for event flags.  adding required height for enabled events , number eventTypes , height of an event bar
+   QString text= QString("%1 -> %2     %3: %4 H:%5 Vis:%6 barH:%7").
+        arg(QDateTime::fromMSecsSinceEpoch(minx).time().toString()).
+        arg(QDateTime::fromMSecsSinceEpoch(maxx).time().toString()).
+        arg(QObject::tr("Selection Length")).
+        arg(QTime(0,0).addMSecs(dur).toString("H:mm:ss.zzz"))
+        .arg(height)
+        .arg(vis)
+        .arg(m_barh)
+        ;
+    #else
+    QString text= QString("%1 -> %2       %3: %4").
+        arg(QDateTime::fromMSecsSinceEpoch(minx).time().toString()).
+        arg(QDateTime::fromMSecsSinceEpoch(maxx).time().toString()).
+        arg(QObject::tr("Selection Length")).
+        arg(QTime(0,0).addMSecs(dur).toString("H:mm:ss.zzz")) ;
+    #endif
+    g.renderText(text, left , top -5 );
+
+    QColor barcol;
+
+    // Paint alternating horizontal color bars
+    float barLinetop = linetop;
+    for (int i=0, end=visflags.size(); i < end; i++) {
+        // Alternating box color
+        barcol = COLOR_ALT_BG2;
+        if (i & 1) {
+            if (g.printing() && AppSetting->monochromePrinting()) {
+                barcol = QColor(0xe4, 0xe4, 0xe4, 0xff);
+            } else {
+                barcol = COLOR_ALT_BG1;
+            }
+        }
+
+        painter.fillRect(left, floor(barLinetop), width-1, ceil(m_barh), QBrush(barcol));
+
+        barLinetop += m_barh;
+    }
+
     // Draw playhead
     bool playheadVisible = false;
     qint64 playheadTime = 0;
@@ -217,46 +257,13 @@ void gFlagsGroup::paint(QPainter &painter, gGraph &g, const QRegion &region)
         painter.fillPath(tri, QBrush(QColor(248, 92, 110)));
     }
 
-    #if BAR_TITLE_BAR_DEBUG
-    // debug for minimum size for event flags.  adding required height for enabled events , number eventTypes , height of an event bar
-   QString text= QString("%1 -> %2     %3: %4 H:%5 Vis:%6 barH:%7").
-        arg(QDateTime::fromMSecsSinceEpoch(minx).time().toString()).
-        arg(QDateTime::fromMSecsSinceEpoch(maxx).time().toString()).
-        arg(QObject::tr("Selection Length")).
-        arg(QTime(0,0).addMSecs(dur).toString("H:mm:ss.zzz"))
-        .arg(height)
-        .arg(vis)
-        .arg(m_barh)
-        ;
-    #else
-    QString text= QString("%1 -> %2       %3: %4").
-        arg(QDateTime::fromMSecsSinceEpoch(minx).time().toString()).
-        arg(QDateTime::fromMSecsSinceEpoch(maxx).time().toString()).
-        arg(QObject::tr("Selection Length")).
-        arg(QTime(0,0).addMSecs(dur).toString("H:mm:ss.zzz")) ;
-    #endif
-    g.renderText(text, left , top -5 );
-
-    QColor barcol;
-
+    // Paint the actual flags
+    float flagsLinetop = linetop;
     for (int i=0, end=visflags.size(); i < end; i++) {
-        // Alternating box color
-        barcol = COLOR_ALT_BG2;
-        if (i & 1) {
-            if (g.printing() && AppSetting->monochromePrinting()) {
-                barcol = QColor(0xe4, 0xe4, 0xe4, 0xff);
-            } else {
-                barcol = COLOR_ALT_BG1;
-            }
-        }
-
-        painter.fillRect(left, floor(linetop), width-1, ceil(m_barh), QBrush(barcol));
-
-        // Paint the actual flags
-        QRect rect(left, linetop, width, m_barh);
+        QRect rect(left, flagsLinetop, width, m_barh);
         visflags[i]->m_rect = rect;
         visflags[i]->paint(painter, g, QRegion(rect));
-        linetop += m_barh;
+        flagsLinetop += m_barh;
     }
 
     // graph each session at top
