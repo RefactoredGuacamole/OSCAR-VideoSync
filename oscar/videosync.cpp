@@ -187,15 +187,11 @@ void VideoSync::onMpvSocketReadyRead()
             if (obj["name"] == "playback-time") {
                 m_videoTime = obj["data"].toDouble(0);
                 if (m_synced) {
+                    // Doing these as a one-liner does not work... am I being stupid about casts
                     float videoTimeDelta = m_videoTime - m_syncedVideoTime;
-                    // qDebug() << "videoTimeDelta: " << videoTimeDelta;
                     qint64 msDelta = videoTimeDelta * 1000;
-                    // qDebug() << "msDelta: " << msDelta;
-                    qint64 poop = m_syncedPlayheadTime + msDelta;
-                    // qDebug() << "poop: " << poop;
-                    m_playheadTime = poop;
-                    qDebug() << "video/synced video time: " << m_videoTime << m_syncedVideoTime;
-                    qDebug() << "playhead/synced playhead time: " << m_playheadTime << m_syncedPlayheadTime;
+                    m_playheadTime = m_syncedPlayheadTime + msDelta;
+
                     emit playheadChanged(m_playheadVisible, m_playheadTime);
                 }
             } else if (obj["name"] == "path") {
