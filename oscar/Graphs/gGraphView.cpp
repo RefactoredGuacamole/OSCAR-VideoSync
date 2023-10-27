@@ -3471,7 +3471,7 @@ void gGraphView::keyPressEvent(QKeyEvent *event)
     }
 
     if (event->key() == Qt::Key_Space) {
-        emit spacePressed();
+        emit playPauseRequested();
     }
 
     //qDebug() << "Keypress??";
@@ -3854,4 +3854,11 @@ void gGraphView::redraw()
 #else
     update();
 #endif
+}
+
+void gGraphView::setPlayhead(bool visible, quint64 t) {
+    for (auto& graph : m_graphs) {
+        graph->setPlayhead(visible, t);
+    }
+    emit playheadChanged(true, t);
 }

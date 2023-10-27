@@ -1128,11 +1128,9 @@ void gGraph::mouseReleaseEvent(QMouseEvent *event)
             double zoom;
 
             if (event->button() & Qt::RightButton) {
-                zoom = 1.33;
+                // Set playhead here
+                m_graphview->setPlayhead(true, screenToTime(x));
 
-                if (event->modifiers() & Qt::ControlModifier) { zoom *= 1.5; }
-
-                ZoomX(zoom, x); // Zoom out
                 return;
             } else if (event->button() & Qt::LeftButton) {
                 zoom = 0.75;
@@ -1562,4 +1560,7 @@ void gGraph::dumpInfo() {
     }
 }
 
-
+void gGraph::setPlayhead(bool visible, quint64 t) {
+    m_playheadVisible = visible;
+    m_playheadTime = t;
+}

@@ -545,6 +545,8 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
     VideoSync *videoSyncWidget = new VideoSync();
     ui->tabWidget->addTab(videoSyncWidget, tr("Video"));
     ui->tabWidget->setCurrentWidget(videoSyncWidget);
+    connect(GraphView, &gGraphView::playPauseRequested, videoSyncWidget, &VideoSync::onGraphPlayPauseReq);
+    connect(GraphView, &gGraphView::playheadChanged, videoSyncWidget, &VideoSync::onPlayheadChanged);
 }
 
 Daily::~Daily()

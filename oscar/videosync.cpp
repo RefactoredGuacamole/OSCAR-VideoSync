@@ -22,7 +22,13 @@ VideoSync::VideoSync(QWidget *parent)
     connectWidgets();
 }
 
-void VideoSync::onSpacePressed() {}
+void VideoSync::onGraphPlayPauseReq() {
+    qDebug() << "Play/Pause requested in OSCAR";
+}
+
+void VideoSync::onPlayheadChanged(bool visible, quint64 t) {
+    qDebug() << "Playhead changed: " << visible << ", " << t;
+}
 
 void VideoSync::initMpvPaths()
 {

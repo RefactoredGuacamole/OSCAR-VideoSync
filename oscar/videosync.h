@@ -16,7 +16,8 @@ public:
 signals:
 
 public slots:
-    void onSpacePressed();
+    void onGraphPlayPauseReq();
+    void onPlayheadChanged(bool visible, quint64 t);
 
 private:
     QString m_mpvPath;

@@ -339,6 +339,8 @@ class gGraph : public QObject
 
     void mouseDoubleClickYAxis(QMouseEvent *event);
 
+    void setPlayhead(bool visible, quint64 t);
+
   protected:
     //! \brief Mouse Wheel events
     virtual void wheelEvent(QWheelEvent *event);
@@ -414,6 +416,9 @@ class gGraph : public QObject
     bool m_snapshot;
     EventDataType m_saved_minY=0;
     EventDataType m_saved_maxY=0;
+
+    bool m_playheadVisible = false;
+    quint64 m_playheadTime = 0;
 
   protected slots:
     //! \brief Deselects any highlights, and schedules a main gGraphView redraw
