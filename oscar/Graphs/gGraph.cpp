@@ -1140,53 +1140,56 @@ void gGraph::mouseReleaseEvent(QMouseEvent *event)
                 return;
             }
         } else {
-            m_graphview->setPlayhead(true, screenToTime(x));
+            if (event->button() & Qt::LeftButton) {
+                x -= left;
+                //y -= top;
+                //w-=m_marginleft+left;
+                double qq = rmax_x - rmin_x;
+                double xmult;
 
-            // x -= left;
-            // //y -= top;
-            // //w-=m_marginleft+left;
-            // double qq = rmax_x - rmin_x;
-            // double xmult;
+                double xx = max_x - min_x;
+                //if (xx==qq) xx=1800000;
 
-            // double xx = max_x - min_x;
-            // //if (xx==qq) xx=1800000;
+                xmult = qq / double(w);
 
-            // xmult = qq / double(w);
+                if ((xx == qq) || (x == m_lastx23)) {
+                    double zoom = 1;
 
-            // if ((xx == qq) || (x == m_lastx23)) {
-            //     double zoom = 1;
+                    if (event->button() & Qt::RightButton) {
+                        zoom = 1.33;
 
-            //     if (event->button() & Qt::RightButton) {
-            //         zoom = 1.33;
+                        if (event->modifiers() & Qt::ControlModifier) { zoom *= 1.5; }
+                    } else if (event->button() & Qt::LeftButton) {
+                        zoom = 0.75;
 
-            //         if (event->modifiers() & Qt::ControlModifier) { zoom *= 1.5; }
-            //     } else if (event->button() & Qt::LeftButton) {
-            //         zoom = 0.75;
+                        if (event->modifiers() & Qt::ControlModifier) { zoom /= 1.5; }
+                    }
 
-            //         if (event->modifiers() & Qt::ControlModifier) { zoom /= 1.5; }
-            //     }
+                    xx *= zoom;
 
-            //     xx *= zoom;
+                    if (xx < qq / zoom_hard_limit) { xx = qq / zoom_hard_limit; }
 
-            //     if (xx < qq / zoom_hard_limit) { xx = qq / zoom_hard_limit; }
+                    if (xx > qq) { xx = qq; }
+                }
 
-            //     if (xx > qq) { xx = qq; }
-            // }
+                double j1 = xmult * x;
+                min_x = rmin_x + j1 - (xx / 2.0);
+                max_x = min_x + xx;
 
-            // double j1 = xmult * x;
-            // min_x = rmin_x + j1 - (xx / 2.0);
-            // max_x = min_x + xx;
+                if (min_x < rmin_x) {
+                    min_x = rmin_x;
+                    max_x = rmin_x + xx;
+                } else if (max_x > rmax_x) {
+                    max_x = rmax_x;
+                    min_x = rmax_x - xx;
+                }
 
-            // if (min_x < rmin_x) {
-            //     min_x = rmin_x;
-            //     max_x = rmin_x + xx;
-            // } else if (max_x > rmax_x) {
-            //     max_x = rmax_x;
-            //     min_x = rmax_x - xx;
-            // }
+                m_graphview->SetXBounds(min_x, max_x, m_group);
+                m_lastx23 = x;
 
-            // m_graphview->SetXBounds(min_x, max_x, m_group);
-            // m_lastx23 = x;
+            } else if (event->button() & Qt::RightButton) {
+                m_graphview->setPlayhead(true, screenToTime(x));
+            }
         }
     }
 
