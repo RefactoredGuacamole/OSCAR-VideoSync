@@ -3470,6 +3470,10 @@ void gGraphView::keyPressEvent(QKeyEvent *event)
         g->ZoomX(zoom, 0); // Zoom out
     }
 
+    if (event->key() == Qt::Key_Space) {
+        emit spacePressed();
+    }
+
     //qDebug() << "Keypress??";
 }
 

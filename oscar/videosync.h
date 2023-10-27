@@ -15,6 +15,9 @@ public:
 
 signals:
 
+public slots:
+    void onSpacePressed();
+
 private:
     QString m_mpvPath;
     QString m_mpvSocketName;
@@ -24,6 +27,9 @@ private:
 
     QPushButton *m_button1;
     QPushButton *m_button2;
+
+    bool m_mpvPaused = true;
+    float m_mpvPlaybackTime = 0;
 
     void initMpvPaths();
     void createWidgets();

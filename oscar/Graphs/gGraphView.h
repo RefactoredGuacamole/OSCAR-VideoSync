@@ -738,8 +738,9 @@ class gGraphView
     void updateRange(double,double);
     void GraphsChanged();
     void XBoundsChanged(qint64 ,qint64);
+    void spacePressed();
 
-  public slots:
+public slots:
     //! \brief Callback from the ScrollBar, to change scroll position
     void scrollbarValueChanged(int val);
 

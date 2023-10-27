@@ -22,6 +22,8 @@ VideoSync::VideoSync(QWidget *parent)
     connectWidgets();
 }
 
+void VideoSync::onSpacePressed() {}
+
 void VideoSync::initMpvPaths()
 {
     // Hunt MPV path
