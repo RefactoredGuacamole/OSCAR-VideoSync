@@ -22,10 +22,12 @@ private:
     QLocalSocket *m_mpvSocket;
 
     QPushButton *m_button1;
+    QPushButton *m_button2;
 
     void initMpvPaths();
     void createWidgets();
     void connectWidgets();
     void onOpenMpvClick();
+    void onMpvSocketReadyRead();
 };
 
