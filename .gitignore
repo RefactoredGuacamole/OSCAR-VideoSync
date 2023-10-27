@@ -50,3 +50,4 @@ doxydoc
 
 #SourceTrail files
 *.json
+.cache/clangd/index

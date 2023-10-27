@@ -322,6 +322,7 @@ SOURCES += \
     SleepLib/loader_plugins/viatom_loader.cpp \
     SleepLib/loader_plugins/zeo_loader.cpp \
     SleepLib/loader_plugins/resvent_loader.cpp \
+    videosync.cpp \
     zip.cpp \
     SleepLib/thirdparty/miniz.c \
     csv.cpp \
@@ -435,6 +436,7 @@ HEADERS  += \
     SleepLib/thirdparty/botan_linux.h \
     SleepLib/thirdparty/botan_macos.h \
     SleepLib/crypto.h \
+    videosync.h \
     zip.h \
     SleepLib/thirdparty/miniz.h \
     csv.h \

@@ -45,6 +45,7 @@
 #include "Graphs/gStatsLine.h"
 #include "Graphs/gdailysummary.h"
 #include "Graphs/MinutesAtPressure.h"
+#include "videosync.h"
 
 extern MainWindow * mainwin;
 
@@ -170,7 +171,6 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
 //    }
 
 
-    ui->calNavWidget->setMaximumHeight(ui->calNavWidget->height());
     ui->calNavWidget->setMinimumHeight(ui->calNavWidget->height());
     QWidget *widget = new QWidget(ui->tabWidget);
     sessionbar = new SessionBar(widget);
@@ -541,6 +541,8 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
 //    sleep(3);
     saveGraphLayoutSettings=nullptr;
     dailySearchTab = new DailySearchTab(this,ui->searchTab,ui->tabWidget);
+
+    ui->tabWidget->addTab(new VideoSync(), tr("Video"));
 }
 
 Daily::~Daily()
