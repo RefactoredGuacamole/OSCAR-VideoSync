@@ -435,7 +435,6 @@ void gGraph::paint(QPainter &painter, const QRegion &region)
         top = m_margintop;
     }
 
-
 #ifdef DEBUG_LAYOUT
     QColor col = Qt::red;
     painter.setPen(col);
@@ -1563,4 +1562,10 @@ void gGraph::dumpInfo() {
 void gGraph::setPlayhead(bool visible, quint64 t) {
     m_playheadVisible = visible;
     m_playheadTime = t;
+    qDebug() << "gGraph::setPlayhead(" << m_playheadVisible << ", " << m_playheadTime;
+}
+
+void gGraph::getPlayhead(bool& visible, quint64& t) {
+    visible = m_playheadVisible;
+    t = m_playheadTime;
 }

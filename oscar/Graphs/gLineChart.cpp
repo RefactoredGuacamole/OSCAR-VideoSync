@@ -513,6 +513,16 @@ void gLineChart::paint(QPainter &painter, gGraph &w, const QRegion &region)
         }
     }
 
+    // Draw playhead
+    bool playheadVisible = false;
+    quint64 playheadTime = 0;
+    w.getPlayhead(playheadVisible, playheadTime);
+    if (playheadVisible && (playheadTime > minx) && (playheadTime < maxx)) {
+        double xpos = (playheadTime - double(minx)) * xmult;
+        painter.setPen(QPen(QBrush(QColor(255,100,100,255)),1));
+        painter.drawLine(left+xpos, top-w.marginTop()-3, left+xpos, top+height+w.bottom-1);
+    }
+
     double lastpx, lastpy;
     double px, py;
     int idx;
