@@ -14,6 +14,7 @@ public:
     explicit VideoSync(QWidget *parent = nullptr);
 
 signals:
+    void playheadChanged(bool visible, qint64 t);
 
 public slots:
     void onGraphPlayPauseReq();
@@ -29,13 +30,17 @@ private:
     QPushButton *m_openMpvButton;
     QPushButton *m_syncButton;
 
-    bool m_mpvPaused = true;
-    float m_mpvPlaybackTime = 0;
+    // Cached properties from MPV
+    bool m_videoPaused = true;
+    float m_videoTime = 0;
+    QString m_videoPath; // Not doing much with this right now
+
+    bool m_playheadVisible = false;
+    qint64 m_playheadTime = -1;
 
     bool m_synced = false;
     qint64 m_syncedPlayheadTime = -1;
     float m_syncedVideoTime = -1;
-    QString m_videoPath; // Not doing much with this right now
 
     void initMpvPaths();
     void createWidgets();

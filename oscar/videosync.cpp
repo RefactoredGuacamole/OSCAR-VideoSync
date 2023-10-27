@@ -24,11 +24,25 @@ VideoSync::VideoSync(QWidget *parent)
 }
 
 void VideoSync::onGraphPlayPauseReq() {
-    qDebug() << "Play/Pause requested in OSCAR";
+    if (m_synced) {
+        m_videoPaused = !m_videoPaused;
+        sendMpvCommand({"set_property", "pause", m_videoPaused});
+    }
 }
 
 void VideoSync::onPlayheadChanged(bool visible, qint64 t) {
-    qDebug() << "Playhead changed: " << visible << ", " << t;
+    // Because mpv can control graphview and vice versa, check if changed to
+    // avoid event loop
+    if (visible == m_playheadVisible && t == m_playheadTime) {
+        return;
+    }
+
+    m_playheadVisible = visible;
+    m_playheadTime = t;
+    if (m_synced) {
+        float newVideoTime = m_videoTime + ((m_syncedPlayheadTime - m_playheadTime) / 1000.f);
+        sendMpvCommand({"seek", newVideoTime, "absolute", "exact"});
+    }
 }
 
 void VideoSync::initMpvPaths()
@@ -77,8 +91,14 @@ void VideoSync::connectWidgets()
 {
     connect(m_openMpvButton, &QPushButton::clicked, this, &VideoSync::onOpenMpvClick);
     connect(m_syncButton, &QPushButton::clicked, this, [this] {
-        sendMpvCommand({"seek", 60.0, "absolute", "exact"});
-        sendMpvCommand({"set_property", "pause", false});
+        if (m_synced) {
+            m_synced = false;
+        } else {
+            m_synced = true;
+            m_syncedPlayheadTime = m_playheadTime;
+            m_syncedVideoTime = m_videoTime;
+        }
+        update();
     });
 
     connect(m_mpvProcess, &QProcess::stateChanged, m_openMpvButton, [this] {
@@ -104,6 +124,7 @@ void VideoSync::connectWidgets()
                     QTimer::singleShot(100, m_mpvSocket, [this] { // WHY IS THIS NECESSARY
                         sendMpvCommand({"observe_property", 1, "playback-time"});
                         sendMpvCommand({"observe_property", 2, "path"});
+                        sendMpvCommand({"observe_property", 3, "pause"});
                     });
                 } else {
                     qDebug() << "MPV socket no connection";
@@ -132,8 +153,8 @@ void VideoSync::onOpenMpvClick()
                                 "--keep-open",
                                 "--auto-window-resize=no", // Not implemented on macOS
                                 "--ontop",
+                                "--pause",
                             });
-    } else if (m_mpvProcess->state() == QProcess::ProcessState::Running) {
     }
 }
 
@@ -142,16 +163,20 @@ void VideoSync::onMpvSocketReadyRead()
     while (m_mpvSocket->canReadLine()) {
         QByteArray line(m_mpvSocket->readLine());
         qDebug() << "mpv >> " << line;
-        QJsonDocument doc;
-        doc.fromJson(line);
-
-        const QJsonObject& obj = doc.object();
+        QJsonDocument doc(QJsonDocument::fromJson(line));
+        QJsonObject obj = doc.object();
 
         if (obj["event"] == "property-change") {
             if (obj["name"] == "playback-time") {
-                m_mpvPlaybackTime = obj["data"].toDouble(-1);
+                m_videoTime = obj["data"].toDouble(-1);
+                if (m_synced) {
+                    m_playheadTime = m_syncedPlayheadTime + (m_videoTime - m_syncedVideoTime) * 1000;
+                    emit playheadChanged(m_playheadVisible, m_playheadTime);
+                }
             } else if (obj["name"] == "path") {
                 m_videoPath = obj["data"].toString("");
+            } else if (obj["name"] == "pause") {
+                m_videoPaused = obj["data"].toBool(true);
             }
         }
     }
@@ -166,6 +191,7 @@ void VideoSync::sendMpvCommand(const QJsonArray &cmd)
     qDebug() << "MPV socket << " << cmdStr;
     m_mpvSocket->write(cmdStr.toUtf8());
     m_mpvSocket->write("\n");
+    m_mpvSocket->flush();
 }
 
 void VideoSync::update() {
