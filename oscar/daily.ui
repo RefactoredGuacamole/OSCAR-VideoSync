@@ -1431,6 +1431,11 @@ QSlider::handle:horizontal  {
          <string>Search</string>
         </attribute>
        </widget>
+       <widget class="QWidget" name="videoTab">
+        <attribute name="title">
+         <string>Video</string>
+        </attribute>
+       </widget>
       </widget>
      </widget>
      <widget class="QWidget" name="layoutWidget">
