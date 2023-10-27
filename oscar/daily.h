@@ -31,6 +31,7 @@ namespace Ui {
 class MainWindow;
 class DailySearchTab;
 class gFlagsGroup;
+class VideoSync;
 
 
 /*! \class Daily
@@ -373,6 +374,8 @@ private:
     bool BookmarksChanged;
 
     SaveGraphLayoutSettings* saveGraphLayoutSettings=nullptr;
+
+    VideoSync* m_videoSyncWidget = nullptr;
 };
 
 #endif // DAILY_H

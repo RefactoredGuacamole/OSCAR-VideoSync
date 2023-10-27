@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QWidget>
+#include <QDate>
 
 class QPushButton;
 class QProcess;
@@ -14,6 +15,7 @@ class VideoSync : public QWidget
     Q_OBJECT
 public:
     explicit VideoSync(QWidget *parent = nullptr);
+    void loadDate(QDate date);
 
 signals:
     void playheadChanged(qint64 t);
@@ -46,9 +48,11 @@ private:
 
     qint64 m_playheadTime = 0;
 
+    QDate m_date;
     bool m_synced = false;
     qint64 m_syncedPlayheadTime = 0;
     float m_syncedVideoTime = 0;
+    float m_syncSkew = 1.0;
 
     void initMpvPaths();
     void createWidgets();
@@ -57,5 +61,6 @@ private:
     void onMpvSocketReadyRead();
     void sendMpvCommand(const QJsonArray &cmd);
     void update();
+    void saveSettings();
+    QString buildSettingsFilePath();
 };
-

@@ -542,12 +542,12 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
     saveGraphLayoutSettings=nullptr;
     dailySearchTab = new DailySearchTab(this,ui->searchTab,ui->tabWidget);
 
-    VideoSync *videoSyncWidget = new VideoSync();
-    ui->tabWidget->addTab(videoSyncWidget, tr("Video"));
-    ui->tabWidget->setCurrentWidget(videoSyncWidget);
-    connect(GraphView, &gGraphView::playPauseRequested, videoSyncWidget, &VideoSync::onGraphPlayPauseReq);
-    connect(GraphView, &gGraphView::playheadChanged, videoSyncWidget, &VideoSync::onPlayheadChanged);
-    connect(videoSyncWidget, &VideoSync::playheadChanged, GraphView, [this](qint64 playheadTime) {
+    m_videoSyncWidget = new VideoSync();
+    ui->tabWidget->addTab(m_videoSyncWidget, tr("Video"));
+    ui->tabWidget->setCurrentWidget(m_videoSyncWidget);
+    connect(GraphView, &gGraphView::playPauseRequested, m_videoSyncWidget, &VideoSync::onGraphPlayPauseReq);
+    connect(GraphView, &gGraphView::playheadChanged, m_videoSyncWidget, &VideoSync::onPlayheadChanged);
+    connect(m_videoSyncWidget, &VideoSync::playheadChanged, GraphView, [this](qint64 playheadTime) {
         GraphView->setPlayhead(playheadTime, true);
     });
 }
@@ -1988,6 +1988,8 @@ void Daily::Load(QDate date)
             ui->bookmarkTable->blockSignals(false);
         } // if (journal->settings.contains(Bookmark_Start))
     } // if (journal)
+
+    m_videoSyncWidget->loadDate(date);
 }
 
 void Daily::UnitsChanged()

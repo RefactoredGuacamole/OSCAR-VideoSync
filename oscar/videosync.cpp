@@ -1,5 +1,4 @@
 #include "videosync.h"
-#include "QtWidgets/qboxlayout.h"
 
 #include <QDir>
 #include <QFile>
@@ -16,6 +15,8 @@
 #include <QtDebug>
 #include <QLabel>
 #include <QGroupBox>
+
+#include "SleepLib/profiles.h"
 
 VideoSync::VideoSync(QWidget *parent)
     : QWidget{parent}
@@ -114,6 +115,7 @@ void VideoSync::connectWidgets()
             m_syncedPlayheadTime = m_playheadTime;
             m_syncedVideoTime = m_videoTime;
         }
+        saveSettings();
         update();
     });
 
@@ -221,11 +223,6 @@ void VideoSync::update() {
         m_openMpvButton->setEnabled(false);
     }
 
-    if (m_mpvSocket->state() != QLocalSocket::ConnectedState) {
-        m_synced = false;
-        m_videoPath = "";
-    }
-
     // Sync enabled
     if (m_videoPath == "") {
         m_syncButton->setEnabled(false);
@@ -252,4 +249,77 @@ void VideoSync::update() {
         m_videoSyncLabel->setText(QString("Video sync: NONE"));
         m_playheadSyncLabel->setText(QString("Playhead sync: NONE"));
     }
+}
+
+void VideoSync::loadDate(QDate date) {
+    m_date = date;
+
+    // Clear all settings
+    m_videoPath = "";
+    m_synced = false;
+
+    QFile settingsFile(buildSettingsFilePath());
+    if (!settingsFile.exists()) {
+        return;
+    }
+    if (!settingsFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        qWarning() << "Failed to open " << settingsFile;
+        return;
+    }
+    // QJsonDocument assumes utf8
+    QJsonDocument doc(QJsonDocument::fromJson(settingsFile.readAll()));
+    QJsonObject obj = doc.object();
+
+    QJsonArray version = obj["version"].toArray();
+    if (version[0].toInt() > 1) {
+        qWarning() << "VideoSync save version too new to understand" << version;
+        return;
+    }
+    for (auto videoVal : obj["videos"].toArray()) {
+        QJsonObject videoObj = videoVal.toObject();
+        m_synced = true;
+        m_videoPath = videoObj["filePath"].toString();
+        m_syncedVideoTime = videoObj["syncVideoTime"].toDouble();
+        m_syncedPlayheadTime = videoObj["syncCpapTime"].toString().toLongLong();
+        m_syncSkew = videoObj["syncSkew"].toDouble();
+        break; // Assume only one video for now
+    }
+
+    update();
+
+    // TODO refresh mpv
+}
+
+void VideoSync::saveSettings() {
+    QJsonObject settingsJ;
+    settingsJ["version"] = QJsonArray({1, 0, 0});
+    if (m_synced) {
+        settingsJ["videos"] = QJsonArray({
+            QJsonObject({
+                {"filePath", m_videoPath},
+                {"syncVideoTime", m_syncedVideoTime},
+                {"syncCpapTime", QString::number(m_syncedPlayheadTime)},
+                {"syncSkew", m_syncSkew},
+            })}
+        );
+    } else {
+        settingsJ["videos"] = QJsonArray();
+    }
+
+    // I think this always emits utf8
+    QByteArray settingsStr = QJsonDocument(settingsJ).toJson(QJsonDocument::Indented);
+    QFile settingsFile(buildSettingsFilePath());
+    settingsFile.open(QIODevice::WriteOnly | QIODevice::Text);
+    settingsFile.write(settingsStr);
+}
+
+QString VideoSync::buildSettingsFilePath() {
+    QDir settingsDir(p_profile->dataFolder());
+    settingsDir.mkdir("VideoSync");
+    settingsDir.cd("VideoSync");
+    QString yearDir(QString::asprintf("%04d", m_date.year()));
+    settingsDir.mkdir(yearDir);
+    settingsDir.cd(yearDir);
+    QString fileName(QString::asprintf("%02d%02d.json", m_date.month(), m_date.day()));
+    return settingsDir.filePath(fileName);
 }
