@@ -14,6 +14,7 @@
 
 #include <cmath>
 #include <QVector>
+#include <QPainterPath>
 #include "SleepLib/profiles.h"
 #include "gFlagsLine.h"
 #include "gYAxis.h"
@@ -187,6 +188,34 @@ void gFlagsGroup::paint(QPainter &painter, gGraph &g, const QRegion &region)
     qint64 minx,maxx,dur;
     g.graphView()->GetXBounds(minx,maxx);
     dur = maxx - minx;
+
+    // Draw playhead
+    bool playheadVisible = false;
+    qint64 playheadTime = 0;
+    g.getPlayhead(playheadVisible, playheadTime);
+    qint64 rminx = g.rmin_x;
+    qint64 rmaxx = g.rmax_x;
+    qint64 dayDur = rmaxx - rminx;
+    double xmult = double(width) / dayDur;
+    if (playheadVisible && (playheadTime > rminx) && (playheadTime < rmaxx)) {
+        double xpos = (playheadTime - double(rminx)) * xmult;
+        painter.setPen(QPen(QBrush(QColor(248, 92, 110)), 3));
+        painter.drawLine(left+xpos, top-g.marginTop()-3, left+xpos, top+height+g.bottom-1);
+
+        // Draw triangle
+        constexpr float WIDTH = 13;
+        constexpr float HEIGHT = 10;
+        const QPointF OFFSET(-1, -5);
+        const QPointF pt1(left + xpos - WIDTH / 2 + OFFSET.x(), top - g.marginTop() + OFFSET.y());
+        const QPointF pt2(left + xpos + OFFSET.x(), top - g.marginTop() + OFFSET.y() + HEIGHT);
+        const QPointF pt3(left + xpos + WIDTH / 2 + OFFSET.x(), top - g.marginTop() + OFFSET.y());
+        QPainterPath tri;
+        tri.moveTo(pt1);
+        tri.lineTo(pt2);
+        tri.lineTo(pt3);
+        tri.lineTo(pt1);
+        painter.fillPath(tri, QBrush(QColor(248, 92, 110)));
+    }
 
     #if BAR_TITLE_BAR_DEBUG
     // debug for minimum size for event flags.  adding required height for enabled events , number eventTypes , height of an event bar

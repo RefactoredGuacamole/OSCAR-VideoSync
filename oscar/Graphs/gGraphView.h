@@ -510,7 +510,7 @@ class gGraphView
     inline const float &devicePixelRatio() { return m_dpr; }
     void setDevicePixelRatio(float dpr) { m_dpr = dpr; }
 
-    void setPlayhead(bool visible, quint64 t);
+    void setPlayhead(bool visible, qint64 t);
 
 #ifdef ENABLE_THREADED_DRAWING
     QMutex text_mutex;
@@ -736,7 +736,7 @@ class gGraphView
     bool m_showAuthorMessage;
 
     bool m_playheadVisible = false;
-    quint64 m_playheadPos = 0;
+    qint64 m_playheadPos = 0;
 
 signals:
     void updateCurrentTime(double);
@@ -746,7 +746,7 @@ signals:
 
     // Video sync
     void playPauseRequested();
-    void playheadChanged(bool visible, quint64 t);
+    void playheadChanged(bool visible, qint64 t);
 
 public slots:
     //! \brief Callback from the ScrollBar, to change scroll position

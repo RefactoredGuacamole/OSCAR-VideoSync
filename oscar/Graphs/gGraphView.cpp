@@ -3856,7 +3856,7 @@ void gGraphView::redraw()
 #endif
 }
 
-void gGraphView::setPlayhead(bool visible, quint64 t) {
+void gGraphView::setPlayhead(bool visible, qint64 t) {
     for (auto& graph : m_graphs) {
         graph->setPlayhead(visible, t);
     }

@@ -1140,51 +1140,53 @@ void gGraph::mouseReleaseEvent(QMouseEvent *event)
                 return;
             }
         } else {
-            x -= left;
-            //y -= top;
-            //w-=m_marginleft+left;
-            double qq = rmax_x - rmin_x;
-            double xmult;
+            m_graphview->setPlayhead(true, screenToTime(x));
 
-            double xx = max_x - min_x;
-            //if (xx==qq) xx=1800000;
+            // x -= left;
+            // //y -= top;
+            // //w-=m_marginleft+left;
+            // double qq = rmax_x - rmin_x;
+            // double xmult;
 
-            xmult = qq / double(w);
+            // double xx = max_x - min_x;
+            // //if (xx==qq) xx=1800000;
 
-            if ((xx == qq) || (x == m_lastx23)) {
-                double zoom = 1;
+            // xmult = qq / double(w);
 
-                if (event->button() & Qt::RightButton) {
-                    zoom = 1.33;
+            // if ((xx == qq) || (x == m_lastx23)) {
+            //     double zoom = 1;
 
-                    if (event->modifiers() & Qt::ControlModifier) { zoom *= 1.5; }
-                } else if (event->button() & Qt::LeftButton) {
-                    zoom = 0.75;
+            //     if (event->button() & Qt::RightButton) {
+            //         zoom = 1.33;
 
-                    if (event->modifiers() & Qt::ControlModifier) { zoom /= 1.5; }
-                }
+            //         if (event->modifiers() & Qt::ControlModifier) { zoom *= 1.5; }
+            //     } else if (event->button() & Qt::LeftButton) {
+            //         zoom = 0.75;
 
-                xx *= zoom;
+            //         if (event->modifiers() & Qt::ControlModifier) { zoom /= 1.5; }
+            //     }
 
-                if (xx < qq / zoom_hard_limit) { xx = qq / zoom_hard_limit; }
+            //     xx *= zoom;
 
-                if (xx > qq) { xx = qq; }
-            }
+            //     if (xx < qq / zoom_hard_limit) { xx = qq / zoom_hard_limit; }
 
-            double j1 = xmult * x;
-            min_x = rmin_x + j1 - (xx / 2.0);
-            max_x = min_x + xx;
+            //     if (xx > qq) { xx = qq; }
+            // }
 
-            if (min_x < rmin_x) {
-                min_x = rmin_x;
-                max_x = rmin_x + xx;
-            } else if (max_x > rmax_x) {
-                max_x = rmax_x;
-                min_x = rmax_x - xx;
-            }
+            // double j1 = xmult * x;
+            // min_x = rmin_x + j1 - (xx / 2.0);
+            // max_x = min_x + xx;
 
-            m_graphview->SetXBounds(min_x, max_x, m_group);
-            m_lastx23 = x;
+            // if (min_x < rmin_x) {
+            //     min_x = rmin_x;
+            //     max_x = rmin_x + xx;
+            // } else if (max_x > rmax_x) {
+            //     max_x = rmax_x;
+            //     min_x = rmax_x - xx;
+            // }
+
+            // m_graphview->SetXBounds(min_x, max_x, m_group);
+            // m_lastx23 = x;
         }
     }
 
@@ -1559,13 +1561,13 @@ void gGraph::dumpInfo() {
     }
 }
 
-void gGraph::setPlayhead(bool visible, quint64 t) {
+void gGraph::setPlayhead(bool visible, qint64 t) {
     m_playheadVisible = visible;
     m_playheadTime = t;
     qDebug() << "gGraph::setPlayhead(" << m_playheadVisible << ", " << m_playheadTime;
 }
 
-void gGraph::getPlayhead(bool& visible, quint64& t) {
+void gGraph::getPlayhead(bool& visible, qint64& t) {
     visible = m_playheadVisible;
     t = m_playheadTime;
 }

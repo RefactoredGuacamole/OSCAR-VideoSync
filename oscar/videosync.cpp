@@ -26,7 +26,7 @@ void VideoSync::onGraphPlayPauseReq() {
     qDebug() << "Play/Pause requested in OSCAR";
 }
 
-void VideoSync::onPlayheadChanged(bool visible, quint64 t) {
+void VideoSync::onPlayheadChanged(bool visible, qint64 t) {
     qDebug() << "Playhead changed: " << visible << ", " << t;
 }
 
