@@ -16,6 +16,7 @@ signals:
 private:
     QPushButton* m_button1;
     QProcess* m_mpvProcess;
+    QString m_mpvPath;
 
     void onOpenMpvClick();
 };
