@@ -19,7 +19,7 @@ VideoSync::VideoSync(QWidget *parent)
     m_mpvProcess = new QProcess(this);
 
     connect(m_button1, &QPushButton::clicked, this, &VideoSync::onOpenMpvClick);
-    connect(m_mpvProcess, &QProcess::stateChanged, label, [=] {
+    connect(m_mpvProcess, &QProcess::stateChanged, label, [this, label] {
         if (m_mpvProcess->state() == QProcess::ProcessState::NotRunning) {
             label->setText("NotRunning");
         } else if (m_mpvProcess->state() == QProcess::ProcessState::Starting) {
@@ -33,5 +33,9 @@ VideoSync::VideoSync(QWidget *parent)
 void VideoSync::onOpenMpvClick() {
     if (m_mpvProcess->state() == QProcess::ProcessState::NotRunning) {
         m_mpvProcess->start("/opt/homebrew/bin/mpv", {"--input-ipc-server=/tmp/mpvsocket", "--force-window", "--idle"});
+        m_button1->setText("Close MPV");
+    } else {
+        m_mpvProcess->terminate();
+        m_button1->setText("Open MPV");
     }
 }
