@@ -339,8 +339,8 @@ class gGraph : public QObject
 
     void mouseDoubleClickYAxis(QMouseEvent *event);
 
-    void setPlayhead(bool visible, qint64 t);
-    void getPlayhead(bool& visible, qint64& t);
+    void setPlayhead(qint64 t);
+    void getPlayhead(qint64& t);
 
   protected:
     //! \brief Mouse Wheel events
@@ -418,7 +418,6 @@ class gGraph : public QObject
     EventDataType m_saved_minY=0;
     EventDataType m_saved_maxY=0;
 
-    bool m_playheadVisible = false;
     quint64 m_playheadTime = 0;
 
   protected slots:

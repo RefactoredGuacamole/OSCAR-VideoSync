@@ -3856,10 +3856,11 @@ void gGraphView::redraw()
 #endif
 }
 
-void gGraphView::setPlayhead(bool visible, qint64 t) {
+void gGraphView::setPlayhead(qint64 t, bool follow) {
     for (auto& graph : m_graphs) {
-        graph->setPlayhead(visible, t);
+        graph->setPlayhead(t);
     }
     timedRedraw(0);
-    emit playheadChanged(visible, t);
+    emit playheadChanged(t);
+    [](bool){}(follow);
 }

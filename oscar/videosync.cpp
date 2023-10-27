@@ -33,14 +33,13 @@ void VideoSync::onGraphPlayPauseReq() {
     }
 }
 
-void VideoSync::onPlayheadChanged(bool visible, qint64 t) {
+void VideoSync::onPlayheadChanged(qint64 t) {
     // Because mpv can control graphview and vice versa, check if changed to
     // avoid event loop
-    if (visible == m_playheadVisible && t == m_playheadTime) {
+    if (t == m_playheadTime) {
         return;
     }
 
-    m_playheadVisible = visible;
     m_playheadTime = t;
     if (m_synced) {
         float newVideoTime = m_syncedVideoTime + ((m_playheadTime - m_syncedPlayheadTime) / 1000.f);
@@ -192,7 +191,7 @@ void VideoSync::onMpvSocketReadyRead()
                     qint64 msDelta = videoTimeDelta * 1000;
                     m_playheadTime = m_syncedPlayheadTime + msDelta;
 
-                    emit playheadChanged(m_playheadVisible, m_playheadTime);
+                    emit playheadChanged(m_playheadTime);
                 }
             } else if (obj["name"] == "path") {
                 m_videoPath = obj["data"].toString("");

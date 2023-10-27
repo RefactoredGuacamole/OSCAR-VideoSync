@@ -16,11 +16,11 @@ public:
     explicit VideoSync(QWidget *parent = nullptr);
 
 signals:
-    void playheadChanged(bool visible, qint64 t);
+    void playheadChanged(qint64 t);
 
 public slots:
     void onGraphPlayPauseReq();
-    void onPlayheadChanged(bool visible, qint64 t);
+    void onPlayheadChanged(qint64 t);
 
 private:
     QString m_mpvPath;
@@ -44,7 +44,6 @@ private:
     float m_videoTime = 0;
     QString m_videoPath; // Not doing much with this right now
 
-    bool m_playheadVisible = false;
     qint64 m_playheadTime = 0;
 
     bool m_synced = false;

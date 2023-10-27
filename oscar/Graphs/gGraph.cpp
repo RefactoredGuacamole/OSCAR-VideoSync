@@ -1128,7 +1128,7 @@ void gGraph::mouseReleaseEvent(QMouseEvent *event)
 
             if (event->button() & Qt::RightButton) {
                 // Set playhead here
-                m_graphview->setPlayhead(true, screenToTime(x));
+                m_graphview->setPlayhead(screenToTime(x), false);
 
                 return;
             } else if (event->button() & Qt::LeftButton) {
@@ -1564,12 +1564,10 @@ void gGraph::dumpInfo() {
     }
 }
 
-void gGraph::setPlayhead(bool visible, qint64 t) {
-    m_playheadVisible = visible;
+void gGraph::setPlayhead(qint64 t) {
     m_playheadTime = t;
 }
 
-void gGraph::getPlayhead(bool& visible, qint64& t) {
-    visible = m_playheadVisible;
+void gGraph::getPlayhead(qint64& t) {
     t = m_playheadTime;
 }

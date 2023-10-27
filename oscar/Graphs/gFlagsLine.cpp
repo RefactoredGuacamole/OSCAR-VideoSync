@@ -230,14 +230,13 @@ void gFlagsGroup::paint(QPainter &painter, gGraph &g, const QRegion &region)
     }
 
     // Draw playhead
-    bool playheadVisible = false;
     qint64 playheadTime = 0;
-    g.getPlayhead(playheadVisible, playheadTime);
+    g.getPlayhead(playheadTime);
     qint64 rminx = g.rmin_x;
     qint64 rmaxx = g.rmax_x;
     qint64 dayDur = rmaxx - rminx;
     double xmult = double(width) / dayDur;
-    if (playheadVisible && (playheadTime > rminx) && (playheadTime < rmaxx)) {
+    if ((playheadTime > rminx) && (playheadTime < rmaxx)) {
         double xpos = (playheadTime - double(rminx)) * xmult;
         painter.setPen(QPen(QBrush(QColor(248, 92, 110)), 3));
         painter.drawLine(left+xpos, top-g.marginTop()-3, left+xpos, top+height+g.bottom-1);

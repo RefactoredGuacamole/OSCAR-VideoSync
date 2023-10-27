@@ -515,10 +515,9 @@ void gLineChart::paint(QPainter &painter, gGraph &w, const QRegion &region)
     }
 
     // Draw playhead
-    bool playheadVisible = false;
     qint64 playheadTime = 0;
-    w.getPlayhead(playheadVisible, playheadTime);
-    if (playheadVisible && (playheadTime > minx) && (playheadTime < maxx)) {
+    w.getPlayhead(playheadTime);
+    if ((playheadTime > minx) && (playheadTime < maxx)) {
         double xpos = (playheadTime - double(minx)) * xmult;
         painter.setPen(QPen(QBrush(QColor(248, 92, 110)), 3));
         painter.drawLine(left+xpos, top-w.marginTop()-3, left+xpos, top+height+w.bottom-1);
