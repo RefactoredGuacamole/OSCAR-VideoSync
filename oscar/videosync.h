@@ -26,11 +26,15 @@ private:
     QProcess *m_mpvProcess;
     QLocalSocket *m_mpvSocket;
 
-    QPushButton *m_button1;
-    QPushButton *m_button2;
+    QPushButton *m_openMpvButton;
+    QPushButton *m_syncButton;
 
     bool m_mpvPaused = true;
     float m_mpvPlaybackTime = 0;
+
+    bool m_synced = false;
+    qint64 m_syncedPlayheadTime;
+    float m_syncedVideoTime;
 
     void initMpvPaths();
     void createWidgets();
@@ -38,5 +42,6 @@ private:
     void onOpenMpvClick();
     void onMpvSocketReadyRead();
     void sendMpvCommand(const QJsonArray &cmd);
+    void update();
 };
 

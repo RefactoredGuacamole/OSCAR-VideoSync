@@ -20,6 +20,7 @@ VideoSync::VideoSync(QWidget *parent)
     initMpvPaths();
     createWidgets();
     connectWidgets();
+    update();
 }
 
 void VideoSync::onGraphPlayPauseReq() {
@@ -62,40 +63,36 @@ void VideoSync::createWidgets()
     m_mpvProcess = new QProcess(this);
     m_mpvSocket = new QLocalSocket(this);
 
-    m_button1 = new QPushButton(tr("Open MPV"));
-    m_button2 = new QPushButton(tr("Play/Pause"));
+    m_openMpvButton = new QPushButton();
+    m_syncButton = new QPushButton();
 
     auto *layout = new QVBoxLayout();
-    layout->addWidget(m_button1);
-    layout->addWidget(m_button2);
+    layout->addWidget(m_openMpvButton);
+    layout->addWidget(m_syncButton);
     layout->setAlignment(Qt::AlignTop);
     setLayout(layout);
 }
 
 void VideoSync::connectWidgets()
 {
-    connect(m_button1, &QPushButton::clicked, this, &VideoSync::onOpenMpvClick);
-    connect(m_button2, &QPushButton::clicked, this, [this] {
+    connect(m_openMpvButton, &QPushButton::clicked, this, &VideoSync::onOpenMpvClick);
+    connect(m_syncButton, &QPushButton::clicked, this, [this] {
         sendMpvCommand({"seek", 60.0, "absolute", "exact"});
         sendMpvCommand({"set_property", "pause", false});
     });
 
-    connect(m_mpvProcess, &QProcess::stateChanged, m_button1, [this] {
-#if defined(Q_OS_UNIX)
-        // Attempt to disconnect lingering MPV instances on macOS/Linux. Not sure about Windows.
-        QFile::remove(m_mpvSocketName);
-#endif
-        m_button1->setText(tr("Open MPV"));
+    connect(m_mpvProcess, &QProcess::stateChanged, m_openMpvButton, [this] {
         if (m_mpvProcess->state() == QProcess::ProcessState::Running) {
-            m_button1->setText(tr("Focus MPV"));
             QTimer::singleShot(500, m_mpvSocket, [this] {
                 m_mpvSocket->connectToServer(m_mpvSocketName);
             });
         }
+        update();
     });
 
-    connect(m_mpvProcess, &QProcess::errorOccurred, m_button1, [this] {
+    connect(m_mpvProcess, &QProcess::errorOccurred, m_openMpvButton, [this] {
         qDebug() << m_mpvProcess->errorString();
+        update();
     });
 
     connect(m_mpvSocket,
@@ -110,6 +107,7 @@ void VideoSync::connectWidgets()
                 } else {
                     qDebug() << "MPV socket no connection";
                 }
+                update();
             });
     connect(m_mpvSocket, &QLocalSocket::errorOccurred, m_mpvSocket, [this]() {
         qDebug() << "MPV socket error:" << m_mpvSocket->errorString();
@@ -120,6 +118,10 @@ void VideoSync::connectWidgets()
 void VideoSync::onOpenMpvClick()
 {
     if (m_mpvProcess->state() == QProcess::ProcessState::NotRunning) {
+        #if defined(Q_OS_UNIX)
+                // Attempt to disconnect lingering MPV instances on macOS/Linux. Not sure about Windows.
+                QFile::remove(m_mpvSocketName);
+        #endif
         m_mpvProcess->start(m_mpvPath,
                             {
                                 QString("--input-ipc-server=") % m_mpvSocketName,
@@ -128,6 +130,7 @@ void VideoSync::onOpenMpvClick()
                                 "--no-config",
                                 "--keep-open",
                                 "--auto-window-resize=no", // Not implemented on macOS
+                                "--ontop",
                             });
     } else if (m_mpvProcess->state() == QProcess::ProcessState::Running) {
     }
@@ -149,4 +152,21 @@ void VideoSync::sendMpvCommand(const QJsonArray &cmd)
     qDebug() << "MPV socket << " << cmdStr;
     m_mpvSocket->write(cmdStr.toUtf8());
     m_mpvSocket->write("\n");
+}
+
+void VideoSync::update() {
+    if (m_mpvSocket->state() == QLocalSocket::ConnectedState) {
+        m_openMpvButton->setText(tr("Focus MPV"));
+        m_syncButton->setEnabled(true);
+    } else {
+        m_openMpvButton->setText(tr("Open MPV"));
+        m_syncButton->setEnabled(false);
+        m_synced = false;
+    }
+
+    if (m_synced) {
+        m_syncButton->setText(tr("Synced - Click to Unsync"));
+    } else {
+        m_syncButton->setText(tr("Not Synced - Click to Sync"));
+    }
 }
