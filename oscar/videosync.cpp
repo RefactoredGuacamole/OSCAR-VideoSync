@@ -40,7 +40,7 @@ void VideoSync::onPlayheadChanged(bool visible, qint64 t) {
     m_playheadVisible = visible;
     m_playheadTime = t;
     if (m_synced) {
-        float newVideoTime = m_videoTime + ((m_syncedPlayheadTime - m_playheadTime) / 1000.f);
+        float newVideoTime = m_syncedVideoTime + ((m_playheadTime - m_syncedPlayheadTime) / 1000.f);
         sendMpvCommand({"seek", newVideoTime, "absolute", "exact"});
     }
 }

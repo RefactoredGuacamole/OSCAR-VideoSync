@@ -1567,7 +1567,6 @@ void gGraph::dumpInfo() {
 void gGraph::setPlayhead(bool visible, qint64 t) {
     m_playheadVisible = visible;
     m_playheadTime = t;
-    qDebug() << "gGraph::setPlayhead(" << m_playheadVisible << ", " << m_playheadTime;
 }
 
 void gGraph::getPlayhead(bool& visible, qint64& t) {

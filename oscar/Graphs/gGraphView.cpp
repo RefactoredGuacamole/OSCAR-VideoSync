@@ -3861,5 +3861,5 @@ void gGraphView::setPlayhead(bool visible, qint64 t) {
         graph->setPlayhead(visible, t);
     }
     timedRedraw(0);
-    emit playheadChanged(true, t);
+    emit playheadChanged(visible, t);
 }
