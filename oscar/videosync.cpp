@@ -15,6 +15,9 @@
 #include <QtDebug>
 #include <QLabel>
 #include <QGroupBox>
+#include <QLineEdit>
+#include <QDoubleValidator>
+#include <QFormLayout>
 
 #include "SleepLib/profiles.h"
 
@@ -40,13 +43,17 @@ void VideoSync::onPlayheadChanged(qint64 t) {
     if (t == m_playheadTime) {
         return;
     }
-
     m_playheadTime = t;
     if (m_synced) {
-        float newVideoTime = m_syncedVideoTime + ((m_playheadTime - m_syncedPlayheadTime) / 1000.f);
-        sendMpvCommand({"seek", newVideoTime, "absolute", "exact"});
+        updateMpv();
     }
     update();
+}
+
+void VideoSync::updateMpv() {
+    double newVideoTime = m_syncedVideoTime + ((m_playheadTime - m_syncedPlayheadTime) / 1000.f) 
+        * m_syncSkew;
+    sendMpvCommand({"seek", newVideoTime, "absolute", "exact"});
 }
 
 void VideoSync::initMpvPaths()
@@ -84,6 +91,12 @@ void VideoSync::createWidgets()
     m_openMpvButton = new QPushButton(tr("Open MPV"));
     m_syncButton = new QPushButton();
 
+    QFormLayout *syncLayout = new QFormLayout();
+    m_syncSkewEdit = new QLineEdit();
+    m_syncSkewEdit->setText(QString::asprintf("%.10f", m_syncSkew));
+    m_syncSkewEdit->setValidator(new QDoubleValidator(0.95, 1.05, 10));
+    syncLayout->addRow(tr("&Sync Skew"), m_syncSkewEdit);
+
     m_debugBox = new QGroupBox(tr("Debug"));
     m_videoLabel = new QLabel();
     m_playheadLabel = new QLabel();
@@ -99,6 +112,7 @@ void VideoSync::createWidgets()
     auto *layout = new QVBoxLayout();
     layout->addWidget(m_openMpvButton);
     layout->addWidget(m_syncButton);
+    layout->addLayout(syncLayout);
     layout->addWidget(m_debugBox);
     layout->setAlignment(Qt::AlignTop);
     setLayout(layout);
@@ -153,6 +167,18 @@ void VideoSync::connectWidgets()
         qDebug() << "MPV socket error:" << m_mpvSocket->errorString();
     });
     connect(m_mpvSocket, &QLocalSocket::readyRead, this, &VideoSync::onMpvSocketReadyRead);
+
+    connect(m_syncSkewEdit, &QLineEdit::textEdited, this, [this](const QString& text) {
+        m_syncSkew = text.toDouble();
+        if (m_synced) {
+            updateMpv();
+        }
+        update();
+    });
+    connect(m_syncSkewEdit, &QLineEdit::editingFinished, this, [this]() {
+        saveSettings();
+        m_syncSkewEdit->setText(QString::asprintf("%.10f", m_syncSkew));
+    });
 }
 
 void VideoSync::onOpenMpvClick()
@@ -162,17 +188,20 @@ void VideoSync::onOpenMpvClick()
                 // Attempt to disconnect lingering MPV instances on macOS/Linux. Not sure about Windows.
                 QFile::remove(m_mpvSocketName);
         #endif
-        m_mpvProcess->start(m_mpvPath,
-                            {
-                                QString("--input-ipc-server=") % m_mpvSocketName,
-                                "--force-window",
-                                "--idle",
-                                "--no-config",
-                                "--keep-open",
-                                "--auto-window-resize=no", // Not implemented on macOS
-                                "--ontop",
-                                "--pause",
-                            });
+        QStringList args({
+                            QString("--input-ipc-server=") % m_mpvSocketName,
+                            "--force-window",
+                            "--idle",
+                            "--no-config",
+                            "--keep-open",
+                            "--auto-window-resize=no", // Not implemented on macOS
+                            "--ontop",
+                            "--pause",
+                        });
+        if (m_videoPath != "") {
+            args.push_back(m_videoPath);
+        }
+        m_mpvProcess->start(m_mpvPath, args);
     }
 }
 
@@ -189,8 +218,8 @@ void VideoSync::onMpvSocketReadyRead()
                 m_videoTime = obj["data"].toDouble(0);
                 if (m_synced) {
                     // Doing these as a one-liner does not work... am I being stupid about casts
-                    float videoTimeDelta = m_videoTime - m_syncedVideoTime;
-                    qint64 msDelta = videoTimeDelta * 1000;
+                    double videoTimeDelta = m_videoTime - m_syncedVideoTime;
+                    qint64 msDelta = qRound((videoTimeDelta * 1000) / m_syncSkew);
                     m_playheadTime = m_syncedPlayheadTime + msDelta;
 
                     emit playheadChanged(m_playheadTime);

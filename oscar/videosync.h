@@ -9,6 +9,7 @@ class QLocalSocket;
 class QJsonArray;
 class QGroupBox;
 class QLabel;
+class QLineEdit;
 
 class VideoSync : public QWidget
 {
@@ -33,6 +34,7 @@ private:
 
     QPushButton *m_openMpvButton;
     QPushButton *m_syncButton;
+    QLineEdit *m_syncSkewEdit;
 
     // Debug
     QGroupBox* m_debugBox;
@@ -43,7 +45,7 @@ private:
 
     // Cached properties from MPV
     bool m_videoPaused = true;
-    float m_videoTime = 0;
+    double m_videoTime = 0;
     QString m_videoPath; // Not doing much with this right now
 
     qint64 m_playheadTime = 0;
@@ -51,8 +53,8 @@ private:
     QDate m_date;
     bool m_synced = false;
     qint64 m_syncedPlayheadTime = 0;
-    float m_syncedVideoTime = 0;
-    float m_syncSkew = 1.0;
+    double m_syncedVideoTime = 0;
+    double m_syncSkew = 1.0;
 
     void initMpvPaths();
     void createWidgets();
@@ -63,4 +65,5 @@ private:
     void update();
     void saveSettings();
     QString buildSettingsFilePath();
+    void updateMpv();
 };
