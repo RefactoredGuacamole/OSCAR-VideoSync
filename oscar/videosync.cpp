@@ -1,4 +1,5 @@
 #include "videosync.h"
+#include "QtWidgets/qboxlayout.h"
 
 #include <QDir>
 #include <QFile>
@@ -13,6 +14,8 @@
 #include <QTimer>
 #include <QVBoxLayout>
 #include <QtDebug>
+#include <QLabel>
+#include <QGroupBox>
 
 VideoSync::VideoSync(QWidget *parent)
     : QWidget{parent}
@@ -80,9 +83,22 @@ void VideoSync::createWidgets()
     m_openMpvButton = new QPushButton(tr("Open MPV"));
     m_syncButton = new QPushButton();
 
+    m_debugBox = new QGroupBox(tr("Debug"));
+    m_videoLabel = new QLabel();
+    m_playheadLabel = new QLabel();
+    m_videoSyncLabel = new QLabel();
+    m_playheadSyncLabel = new QLabel();
+    auto* debugBoxLayout = new QVBoxLayout();
+    debugBoxLayout->addWidget(m_videoLabel);
+    debugBoxLayout->addWidget(m_playheadLabel);
+    debugBoxLayout->addWidget(m_videoSyncLabel);
+    debugBoxLayout->addWidget(m_playheadSyncLabel);
+    m_debugBox->setLayout(debugBoxLayout);
+
     auto *layout = new QVBoxLayout();
     layout->addWidget(m_openMpvButton);
     layout->addWidget(m_syncButton);
+    layout->addWidget(m_debugBox);
     layout->setAlignment(Qt::AlignTop);
     setLayout(layout);
 }
@@ -220,5 +236,16 @@ void VideoSync::update() {
         m_syncButton->setText(tr("Not Synced - Click to Set Sync"));
     } else {
         m_syncButton->setText(tr("Synced - Click to Unsync"));
+    }
+
+    // Debug
+    m_videoLabel->setText(QString::asprintf("Video time: %.3f", m_videoTime));
+    m_playheadLabel->setText(QString::asprintf("Playhead time: %lld", m_playheadTime));
+    if (m_synced) {
+        m_videoSyncLabel->setText(QString::asprintf("Video sync: %.3f", m_syncedVideoTime));
+        m_playheadSyncLabel->setText(QString::asprintf("Playhead sync: %lld", m_syncedPlayheadTime));
+    } else {
+        m_videoSyncLabel->setText(QString("Video sync: NONE"));
+        m_playheadSyncLabel->setText(QString("Playhead sync: NONE"));
     }
 }

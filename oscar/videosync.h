@@ -6,6 +6,8 @@ class QPushButton;
 class QProcess;
 class QLocalSocket;
 class QJsonArray;
+class QGroupBox;
+class QLabel;
 
 class VideoSync : public QWidget
 {
@@ -29,6 +31,13 @@ private:
 
     QPushButton *m_openMpvButton;
     QPushButton *m_syncButton;
+
+    // Debug
+    QGroupBox* m_debugBox;
+    QLabel* m_videoSyncLabel;
+    QLabel* m_playheadSyncLabel;
+    QLabel* m_videoLabel;
+    QLabel* m_playheadLabel;
 
     // Cached properties from MPV
     bool m_videoPaused = true;
