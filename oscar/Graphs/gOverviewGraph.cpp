@@ -469,7 +469,6 @@ void gOverviewGraph::paint(QPainter &painter, gGraph &w, const QRegion &region)
     float py;
     EventDataType total;
 
-    int daynum = 0;
     EventDataType h, tmp;
 
 
@@ -559,7 +558,6 @@ void gOverviewGraph::paint(QPainter &painter, gGraph &w, const QRegion &region)
 
     float compliance_hours = 0;
 
-    int incompliant = 0;
     Day *day;
     EventDataType hours;
 
@@ -725,7 +723,6 @@ void gOverviewGraph::paint(QPainter &painter, gGraph &w, const QRegion &region)
                     if (type == ST_HOURS) {
                         if (tmp < compliance_hours) {
                             col = QColor("#f04040");
-                            incompliant++;
                         } else if (summary_only) {
                             col = summaryColor;
                         }
@@ -835,7 +832,6 @@ void gOverviewGraph::paint(QPainter &painter, gGraph &w, const QRegion &region)
             //    if (Q>maxx+extra) break;
         } else {
             if (Q < maxx) {
-                incompliant++;
             }
 
             lastdaygood = false;
@@ -849,7 +845,6 @@ jumpnext:
 
         px += barw;
 
-        daynum++;
         //lastQ=Q;
     }
     painter.setClipping(false);

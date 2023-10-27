@@ -1142,7 +1142,6 @@ bool Machine::SaveSummaryCache()
 bool Machine::Save()
 {
     //int size;
-    int cnt = 0;
 
     QString path = getDataPath();
     QDir dir(path);
@@ -1157,7 +1156,6 @@ bool Machine::Save()
 
     // store any event summaries..
     for (s = sessionlist.begin(); s != sessionlist.end(); s++) {
-        cnt++;
 
         if ((*s)->IsChanged()) {
             queTask(new SaveTask(*s, this));

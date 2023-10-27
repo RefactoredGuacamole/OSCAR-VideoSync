@@ -316,7 +316,7 @@ bool compressFile(QString infile, QString outfile)
 
 int MachineLoader::Open(const QStringList & paths)
 {
-    int i, skipped = 0;
+    int i;
     int size = paths.size();
     for (i=0; i < size; i++) {
         if (isAborted()) {
@@ -330,7 +330,6 @@ int MachineLoader::Open(const QStringList & paths)
         }
         if (res == 0) {
             // Should we report on skipped count?
-            skipped++;
         }
         emit setProgressValue(i+1);
         QCoreApplication::processEvents();

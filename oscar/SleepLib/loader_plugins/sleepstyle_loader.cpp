@@ -678,11 +678,9 @@ bool SleepStyleLoader::OpenSummary(Machine *mach, const QString & filename)
 
     QDate date;
 
-    int nblock = 0;
 
     // Go through blocks of data until end marker is found
     do {
-        nblock++;
 
         in >> ts;
         if (ts == 0xffffffff) {
@@ -920,7 +918,6 @@ bool SleepStyleLoader::OpenDetail(Machine *mach, const QString & filename)
         sess = Sessions[sessid];
         ti = qint64(sessid) * 1000L;
         sess->really_set_first(ti);
-        long PRSessCount = 0;
 
 //fastleak        EventList *LK = sess->AddEventList(CPAP_LeakTotal, EVL_Event, 1);
         EventList *PR = sess->AddEventList(CPAP_Pressure, EVL_Event, 0.1F);
@@ -945,7 +942,6 @@ bool SleepStyleLoader::OpenDetail(Machine *mach, const QString & filename)
             for (int j = 0; j < 3; ++j) {
                 pressure = data[idx];
                 PR->AddEvent(ti+120000, pressure);
-                PRSessCount++;
 
 #ifdef DEBUGSS
                 leak = data[idx + 1];

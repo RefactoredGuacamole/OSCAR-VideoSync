@@ -1493,7 +1493,6 @@ int calcSPO2Drop(Session *session)
     //qint64 rtime[ringsize]={0};
     //int rp=0;
     int min;
-    int cnt = 0;
     // tmp = 0;
 
     qint64 start = 0;
@@ -1515,7 +1514,6 @@ int calcSPO2Drop(Session *session)
             if (time > start + 3600000) { break; } // just look at the first hour
 
             // tmp += val;
-            cnt++;
         }
     }
 
