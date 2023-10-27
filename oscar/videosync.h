@@ -4,6 +4,7 @@
 
 class QPushButton;
 class QProcess;
+class QLocalSocket;
 
 class VideoSync : public QWidget
 {
@@ -14,9 +15,13 @@ public:
 signals:
 
 private:
-    QPushButton* m_button1;
+    void createWidgets();
+    void connectWidgets();
+
+    QPushButton *m_button1;
     QProcess* m_mpvProcess;
     QString m_mpvPath;
+    QLocalSocket *m_mpvSocket;
 
     void onOpenMpvClick();
 };
