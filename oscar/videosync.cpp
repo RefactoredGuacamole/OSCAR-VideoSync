@@ -68,11 +68,7 @@ void VideoSync::connectWidgets()
 {
     connect(m_button1, &QPushButton::clicked, this, &VideoSync::onOpenMpvClick);
     connect(m_button2, &QPushButton::clicked, this, [this] {
-        QJsonObject cmdJ;
-        cmdJ["command"] = QJsonArray({"get_property", "volume"});
-        QString cmdStr(QJsonDocument(cmdJ).toJson(QJsonDocument::Compact));
-        m_mpvSocket->write(cmdStr.toUtf8());
-        m_mpvSocket->write("\n");
+        sendMpvCommand({"get_property", "volume"});
     });
 
     connect(m_mpvProcess, &QProcess::stateChanged, m_button1, [this] {
@@ -93,13 +89,19 @@ void VideoSync::connectWidgets()
         qDebug() << m_mpvProcess->errorString();
     });
 
-    connect(m_mpvSocket, &QLocalSocket::stateChanged, [](QLocalSocket::LocalSocketState state) {
-        if (state == QLocalSocket::LocalSocketState::ConnectedState) {
-            qDebug() << "Connected to MPV socket";
-        } else {
-            qDebug() << "MPV socket no connection";
-        }
-    });
+    connect(m_mpvSocket,
+            &QLocalSocket::stateChanged,
+            this,
+            [this](QLocalSocket::LocalSocketState state) {
+                if (state == QLocalSocket::LocalSocketState::ConnectedState) {
+                    qDebug() << "MPV socket connected";
+                    QTimer::singleShot(100, m_mpvSocket, [this] { // WHY IS THIS NECESSARY
+                        sendMpvCommand({"observe_property", 1, "time-pos"});
+                    });
+                } else {
+                    qDebug() << "MPV socket no connection";
+                }
+            });
     connect(m_mpvSocket, &QLocalSocket::errorOccurred, m_mpvSocket, [this]() {
         qDebug() << "MPV socket error:" << m_mpvSocket->errorString();
     });
@@ -116,6 +118,7 @@ void VideoSync::onOpenMpvClick()
                                 "--idle",
                                 "--no-config",
                                 "--keep-open",
+                                "--auto-window-resize=no", // Not implemented on macOS
                             });
     } else if (m_mpvProcess->state() == QProcess::ProcessState::Running) {
     }
@@ -127,4 +130,14 @@ void VideoSync::onMpvSocketReadyRead()
         QString line(m_mpvSocket->readLine());
         qDebug() << "MPV socket >> " << line;
     }
+}
+
+void VideoSync::sendMpvCommand(const QJsonArray &cmd)
+{
+    QJsonObject cmdJ;
+    cmdJ["command"] = cmd;
+    QString cmdStr(QJsonDocument(cmdJ).toJson(QJsonDocument::Compact));
+    qDebug() << "MPV socket << " << cmdStr;
+    m_mpvSocket->write(cmdStr.toUtf8());
+    m_mpvSocket->write("\n");
 }

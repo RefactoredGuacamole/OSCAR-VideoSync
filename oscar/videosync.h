@@ -5,6 +5,7 @@
 class QPushButton;
 class QProcess;
 class QLocalSocket;
+class QJsonArray;
 
 class VideoSync : public QWidget
 {
@@ -29,5 +30,6 @@ private:
     void connectWidgets();
     void onOpenMpvClick();
     void onMpvSocketReadyRead();
+    void sendMpvCommand(const QJsonArray &cmd);
 };
 
