@@ -63,7 +63,7 @@ void VideoSync::createWidgets()
     m_mpvProcess = new QProcess(this);
     m_mpvSocket = new QLocalSocket(this);
 
-    m_openMpvButton = new QPushButton();
+    m_openMpvButton = new QPushButton(tr("Open MPV"));
     m_syncButton = new QPushButton();
 
     auto *layout = new QVBoxLayout();
@@ -103,6 +103,7 @@ void VideoSync::connectWidgets()
                     qDebug() << "MPV socket connected";
                     QTimer::singleShot(100, m_mpvSocket, [this] { // WHY IS THIS NECESSARY
                         sendMpvCommand({"observe_property", 1, "playback-time"});
+                        sendMpvCommand({"observe_property", 2, "path"});
                     });
                 } else {
                     qDebug() << "MPV socket no connection";
@@ -139,9 +140,22 @@ void VideoSync::onOpenMpvClick()
 void VideoSync::onMpvSocketReadyRead()
 {
     while (m_mpvSocket->canReadLine()) {
-        QString line(m_mpvSocket->readLine());
-        qDebug() << "MPV socket >> " << line;
+        QByteArray line(m_mpvSocket->readLine());
+        qDebug() << "mpv >> " << line;
+        QJsonDocument doc;
+        doc.fromJson(line);
+
+        const QJsonObject& obj = doc.object();
+
+        if (obj["event"] == "property-change") {
+            if (obj["name"] == "playback-time") {
+                m_mpvPlaybackTime = obj["data"].toDouble(-1);
+            } else if (obj["name"] == "path") {
+                m_videoPath = obj["data"].toString("");
+            }
+        }
     }
+    update();
 }
 
 void VideoSync::sendMpvCommand(const QJsonArray &cmd)
@@ -155,18 +169,30 @@ void VideoSync::sendMpvCommand(const QJsonArray &cmd)
 }
 
 void VideoSync::update() {
-    if (m_mpvSocket->state() == QLocalSocket::ConnectedState) {
-        m_openMpvButton->setText(tr("Focus MPV"));
-        m_syncButton->setEnabled(true);
+    if (m_mpvProcess->state() == QProcess::NotRunning) {
+        m_openMpvButton->setEnabled(true);
     } else {
-        m_openMpvButton->setText(tr("Open MPV"));
-        m_syncButton->setEnabled(false);
-        m_synced = false;
+        m_openMpvButton->setEnabled(false);
     }
 
-    if (m_synced) {
-        m_syncButton->setText(tr("Synced - Click to Unsync"));
+    if (m_mpvSocket->state() != QLocalSocket::ConnectedState) {
+        m_synced = false;
+        m_videoPath = "";
+    }
+
+    // Sync enabled
+    if (m_videoPath == "") {
+        m_syncButton->setEnabled(false);
     } else {
-        m_syncButton->setText(tr("Not Synced - Click to Sync"));
+        m_syncButton->setEnabled(true);
+    }
+
+    // Sync button text
+    if (m_videoPath == "") {
+        m_syncButton->setText(tr("Not Synced - No Video Open"));
+    } else if (!m_synced) {
+        m_syncButton->setText(tr("Not Synced - Click to Set Sync"));
+    } else {
+        m_syncButton->setText(tr("Synced - Click to Unsync"));
     }
 }

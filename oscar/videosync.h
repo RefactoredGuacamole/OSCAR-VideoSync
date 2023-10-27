@@ -33,8 +33,9 @@ private:
     float m_mpvPlaybackTime = 0;
 
     bool m_synced = false;
-    qint64 m_syncedPlayheadTime;
-    float m_syncedVideoTime;
+    qint64 m_syncedPlayheadTime = -1;
+    float m_syncedVideoTime = -1;
+    QString m_videoPath; // Not doing much with this right now
 
     void initMpvPaths();
     void createWidgets();
