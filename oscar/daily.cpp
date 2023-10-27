@@ -542,7 +542,9 @@ Daily::Daily(QWidget *parent,gGraphView * shared)
     saveGraphLayoutSettings=nullptr;
     dailySearchTab = new DailySearchTab(this,ui->searchTab,ui->tabWidget);
 
-    ui->tabWidget->addTab(new VideoSync(), tr("Video"));
+    VideoSync *videoSyncWidget = new VideoSync();
+    ui->tabWidget->addTab(videoSyncWidget, tr("Video"));
+    ui->tabWidget->setCurrentWidget(videoSyncWidget);
 }
 
 Daily::~Daily()
