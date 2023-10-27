@@ -46,6 +46,7 @@ void VideoSync::onPlayheadChanged(bool visible, qint64 t) {
         float newVideoTime = m_syncedVideoTime + ((m_playheadTime - m_syncedPlayheadTime) / 1000.f);
         sendMpvCommand({"seek", newVideoTime, "absolute", "exact"});
     }
+    update();
 }
 
 void VideoSync::initMpvPaths()
@@ -184,9 +185,17 @@ void VideoSync::onMpvSocketReadyRead()
 
         if (obj["event"] == "property-change") {
             if (obj["name"] == "playback-time") {
-                m_videoTime = obj["data"].toDouble(-1);
+                m_videoTime = obj["data"].toDouble(0);
                 if (m_synced) {
-                    m_playheadTime = m_syncedPlayheadTime + (m_videoTime - m_syncedVideoTime) * 1000;
+                    float videoTimeDelta = m_videoTime - m_syncedVideoTime;
+                    // qDebug() << "videoTimeDelta: " << videoTimeDelta;
+                    qint64 msDelta = videoTimeDelta * 1000;
+                    // qDebug() << "msDelta: " << msDelta;
+                    qint64 poop = m_syncedPlayheadTime + msDelta;
+                    // qDebug() << "poop: " << poop;
+                    m_playheadTime = poop;
+                    qDebug() << "video/synced video time: " << m_videoTime << m_syncedVideoTime;
+                    qDebug() << "playhead/synced playhead time: " << m_playheadTime << m_syncedPlayheadTime;
                     emit playheadChanged(m_playheadVisible, m_playheadTime);
                 }
             } else if (obj["name"] == "path") {

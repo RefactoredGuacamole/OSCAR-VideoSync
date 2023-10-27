@@ -45,11 +45,11 @@ private:
     QString m_videoPath; // Not doing much with this right now
 
     bool m_playheadVisible = false;
-    qint64 m_playheadTime = -1;
+    qint64 m_playheadTime = 0;
 
     bool m_synced = false;
-    qint64 m_syncedPlayheadTime = -1;
-    float m_syncedVideoTime = -1;
+    qint64 m_syncedPlayheadTime = 0;
+    float m_syncedVideoTime = 0;
 
     void initMpvPaths();
     void createWidgets();
